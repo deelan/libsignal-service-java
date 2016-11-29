@@ -36,6 +36,7 @@ message DataMessage {
   enum Flags {
     END_SESSION = 1;
     EXPIRATION_TIMER_UPDATE = 2;
+    PROMOTE = 32;
   }
 
   optional string             body        = 1;

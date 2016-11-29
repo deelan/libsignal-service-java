@@ -22,6 +22,7 @@ public class SignalServiceDataMessage {
   private final Optional<SignalServiceGroup>            group;
   private final boolean                                 endSession;
   private final boolean                                 expirationUpdate;
+  private final boolean                                 promote;
   private final int                                     expiresInSeconds;
 
   /**
@@ -96,7 +97,7 @@ public class SignalServiceDataMessage {
    * @param expiresInSeconds The number of seconds in which a message should disappear after having been seen.
    */
   public SignalServiceDataMessage(long timestamp, SignalServiceGroup group, List<SignalServiceAttachment> attachments, String body, int expiresInSeconds) {
-    this(timestamp, group, attachments, body, false, expiresInSeconds, false);
+    this(timestamp, group, attachments, body, false, expiresInSeconds, false, false);
   }
 
   /**
@@ -112,13 +113,14 @@ public class SignalServiceDataMessage {
   public SignalServiceDataMessage(long timestamp, SignalServiceGroup group,
                                   List<SignalServiceAttachment> attachments,
                                   String body, boolean endSession, int expiresInSeconds,
-                                  boolean expirationUpdate)
+                                  boolean expirationUpdate, boolean promote)
   {
     this.timestamp        = timestamp;
     this.body             = Optional.fromNullable(body);
     this.group            = Optional.fromNullable(group);
     this.endSession       = endSession;
     this.expiresInSeconds = expiresInSeconds;
+    this.promote          = promote;
     this.expirationUpdate = expirationUpdate;
 
     if (attachments != null && !attachments.isEmpty()) {
@@ -168,6 +170,10 @@ public class SignalServiceDataMessage {
     return expirationUpdate;
   }
 
+  public boolean isPromote() {
+    return promote;
+  }
+
   public boolean isGroupUpdate() {
     return group.isPresent() && group.get().getType() != SignalServiceGroup.Type.DELIVER;
   }
@@ -185,6 +191,7 @@ public class SignalServiceDataMessage {
     private boolean            endSession;
     private int                expiresInSeconds;
     private boolean            expirationUpdate;
+    private boolean            promote;
 
     private Builder() {}
 
@@ -231,6 +238,15 @@ public class SignalServiceDataMessage {
       return this;
     }
 
+    public Builder asPromote() {
+      return asPromote(true);
+    }
+
+    public Builder asPromote(boolean promote) {
+      this.promote = promote;
+      return this;
+    }
+
     public Builder withExpiration(int expiresInSeconds) {
       this.expiresInSeconds = expiresInSeconds;
       return this;
@@ -239,7 +255,7 @@ public class SignalServiceDataMessage {
     public SignalServiceDataMessage build() {
       if (timestamp == 0) timestamp = System.currentTimeMillis();
       return new SignalServiceDataMessage(timestamp, group, attachments, body, endSession,
-                                          expiresInSeconds, expirationUpdate);
+                                          expiresInSeconds, expirationUpdate, promote);
     }
   }
 }

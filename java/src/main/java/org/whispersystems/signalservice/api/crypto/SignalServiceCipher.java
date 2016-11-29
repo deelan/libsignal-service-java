@@ -153,6 +153,7 @@ public class SignalServiceCipher {
     List<SignalServiceAttachment> attachments      = new LinkedList<>();
     boolean                       endSession       = ((content.getFlags() & DataMessage.Flags.END_SESSION_VALUE) != 0);
     boolean                       expirationUpdate = ((content.getFlags() & DataMessage.Flags.EXPIRATION_TIMER_UPDATE_VALUE) != 0);
+    boolean                       promote          = ((content.getFlags() & DataMessage.Flags.PROMOTE_VALUE) != 0);
 
     for (AttachmentPointer pointer : content.getAttachmentsList()) {
       attachments.add(new SignalServiceAttachmentPointer(pointer.getId(),
@@ -165,7 +166,7 @@ public class SignalServiceCipher {
 
     return new SignalServiceDataMessage(envelope.getTimestamp(), groupInfo, attachments,
                                         content.getBody(), endSession, content.getExpireTimer(),
-                                        expirationUpdate);
+                                        expirationUpdate, promote);
   }
 
   private SignalServiceSyncMessage createSynchronizeMessage(SignalServiceEnvelope envelope, SyncMessage content) {
