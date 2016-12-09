@@ -20,6 +20,7 @@ dependencies {
     compile "org.whispersystems:signal-protocol-java:${signal_version}"
     compile 'com.squareup.okhttp:okhttp:2.2.0'
     compile 'org.apache.httpcomponents:httpclient:4.4'
+    compile "com.stripe:stripe-java:3.5.0"
 
     testCompile 'junit:junit:3.8.2'
 }

@@ -13,6 +13,8 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
+import com.stripe.model.Charge;
+import com.stripe.model.ProductCollection;
 
 import org.apache.http.conn.ssl.StrictHostnameVerifier;
 import org.whispersystems.libsignal.IdentityKey;
@@ -26,8 +28,8 @@ import org.whispersystems.signalservice.api.crypto.AttachmentCipherOutputStream;
 import org.whispersystems.signalservice.api.messages.SignalServiceAttachment.ProgressListener;
 import org.whispersystems.signalservice.api.messages.multidevice.DeviceInfo;
 import org.whispersystems.signalservice.api.push.ContactTokenDetails;
-import org.whispersystems.signalservice.api.push.SignedPreKeyEntity;
 import org.whispersystems.signalservice.api.push.SignalServiceAddress;
+import org.whispersystems.signalservice.api.push.SignedPreKeyEntity;
 import org.whispersystems.signalservice.api.push.TrustStore;
 import org.whispersystems.signalservice.api.push.exceptions.AuthorizationFailedException;
 import org.whispersystems.signalservice.api.push.exceptions.ExpectationFailedException;
@@ -54,8 +56,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -92,6 +96,10 @@ public class PushServiceSocket {
   private static final String ACKNOWLEDGE_MESSAGE_PATH  = "/v1/messages/%s/%d";
   private static final String RECEIPT_PATH              = "/v1/receipt/%s/%d";
   private static final String ATTACHMENT_PATH           = "/v1/attachments/%s";
+
+  private static final String BILLING_CREDS_PATH        = "/v1/billing/auth/%s";
+  private static final String BILLING_PRODUCTS_PATH     = "/v1/billing/products/%s";
+  private static final String BILLING_CHARGE_PATH       = "/v1/billing/charge/%s/%s";
 
   private final String              serviceUrl;
   private final TrustManager[]      trustManagers;
@@ -149,6 +157,30 @@ public class PushServiceSocket {
 
   public void removeDevice(long deviceId) throws IOException {
     makeRequest(String.format(DEVICE_PATH, String.valueOf(deviceId)), "DELETE", null);
+  }
+
+  public BillingInfo connectAccount(String authorizationCode) throws IOException {
+    String responseText = makeRequest(String.format(BILLING_CREDS_PATH, authorizationCode), "GET", null);
+    return JsonUtil.fromJson(responseText, BillingInfo.class);
+  }
+
+  public void revokeBillingAccess(String userId) throws IOException {
+    makeRequest(String.format(BILLING_CREDS_PATH, userId), "DELETE", null);
+  }
+
+  public ProductCollection getProducts(String sellerNumber) throws IOException {
+    String responseText = makeRequest(String.format(BILLING_PRODUCTS_PATH, sellerNumber), "GET", null);
+    return JsonUtil.fromJson(responseText, ProductCollection.class);
+  }
+
+  public Charge performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber) throws IOException {
+    Map<String, String> values = new HashMap<>();
+    values.put("sourceTokenId", sourceTokenId);
+    values.put("sellerNumber", sellerNumber);
+
+    String response = makeRequest(String.format(BILLING_CHARGE_PATH, productId, skuId), "PUT", JsonUtil.toJson(values));
+
+    return JsonUtil.fromJson(response, Charge.class);
   }
 
   public void sendProvisioningMessage(String destination, byte[] body) throws IOException {
