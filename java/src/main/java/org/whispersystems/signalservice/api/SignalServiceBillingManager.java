@@ -1,7 +1,6 @@
 package org.whispersystems.signalservice.api;
 
 
-import com.stripe.model.Charge;
 import com.stripe.model.ProductCollection;
 
 import org.whispersystems.signalservice.api.push.TrustStore;
@@ -74,10 +73,10 @@ public class SignalServiceBillingManager {
      * @param skuId The ID of the SKU of the product being purchased.
      * @param sourceTokenId The ID of a token representing the card/payment handled separately (through the billing SDK, for example).
      * @param sellerNumber The number of the product seller.
-     * @return A Charge object containing the results of the operation.
+     * @return A string containing the results of the operation (a Charge object in JSON form).
      * @throws IOException
      */
-    public Charge performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber) throws IOException {
+    public String performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber) throws IOException {
         return this.pushServiceSocket.performCharge(productId, skuId, sourceTokenId, sellerNumber);
     }
 }
