@@ -13,6 +13,7 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
+import com.stripe.model.ChargeCollection;
 import com.stripe.model.ProductCollection;
 
 import org.apache.http.conn.ssl.StrictHostnameVerifier;
@@ -98,6 +99,7 @@ public class PushServiceSocket {
 
   private static final String BILLING_CREDS_PATH        = "/v1/billing/auth/%s";
   private static final String BILLING_PRODUCTS_PATH     = "/v1/billing/products/%s";
+  private static final String BILLING_CHARGES_PATH      = "/v1/billing/charges/%s";
   private static final String BILLING_CHARGE_PATH       = "/v1/billing/charge/%s/%s";
 
   private final String              serviceUrl;
@@ -170,6 +172,10 @@ public class PushServiceSocket {
   public ProductCollection getProducts(String sellerNumber) throws IOException {
     String responseText = makeRequest(String.format(BILLING_PRODUCTS_PATH, sellerNumber), "GET", null);
     return JsonUtil.fromJson(responseText, ProductCollection.class);
+  }
+
+  public String getPayments(String contactNumber) throws IOException {
+    return makeRequest(String.format(BILLING_CHARGES_PATH, contactNumber), "GET", null);
   }
 
   public String performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber) throws IOException {

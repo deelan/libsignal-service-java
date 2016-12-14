@@ -67,6 +67,17 @@ public class SignalServiceBillingManager {
     public ProductCollection getProducts(String sellerNumber) throws IOException {
         return this.pushServiceSocket.getProducts(sellerNumber);
     }
+
+    /**
+     * Get the list of payments (charges) made by the specified contact.
+     * @param contactNumber The number of the contact to query.
+     * @return A string containing the JSON representation of the charges made by the specified contact.
+     * @throws IOException
+     */
+    public String getPayments(String contactNumber) throws IOException {
+        return this.pushServiceSocket.getPayments(contactNumber);
+    }
+
     /**
      * Perform a charge through the billing service proxied through the Signal server for security purposes.
      * @param productId The ID of the product being purchased.
