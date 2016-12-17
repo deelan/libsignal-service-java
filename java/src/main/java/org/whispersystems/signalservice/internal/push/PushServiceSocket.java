@@ -13,7 +13,6 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
-import com.stripe.model.ChargeCollection;
 import com.stripe.model.ProductCollection;
 
 import org.apache.http.conn.ssl.StrictHostnameVerifier;
@@ -178,10 +177,11 @@ public class PushServiceSocket {
     return makeRequest(String.format(BILLING_CHARGES_PATH, contactNumber), "GET", null);
   }
 
-  public String performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber) throws IOException {
+  public String performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber, String productName) throws IOException {
     Map<String, String> values = new HashMap<>();
     values.put("sourceTokenId", sourceTokenId);
     values.put("sellerNumber", sellerNumber);
+    values.put("productName", productName);
 
     return makeRequest(String.format(BILLING_CHARGE_PATH, productId, skuId), "PUT", JsonUtil.toJson(values));
   }

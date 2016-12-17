@@ -84,10 +84,11 @@ public class SignalServiceBillingManager {
      * @param skuId The ID of the SKU of the product being purchased.
      * @param sourceTokenId The ID of a token representing the card/payment handled separately (through the billing SDK, for example).
      * @param sellerNumber The number of the product seller.
+     * @param productName The name of the product.
      * @return A string containing the results of the operation (a Charge object in JSON form).
      * @throws IOException
      */
-    public String performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber) throws IOException {
-        return this.pushServiceSocket.performCharge(productId, skuId, sourceTokenId, sellerNumber);
+    public String performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber, String productName) throws IOException {
+        return this.pushServiceSocket.performCharge(productId, skuId, sourceTokenId, sellerNumber, productName);
     }
 }
