@@ -8,11 +8,14 @@ package org.whispersystems.signalservice.internal.push;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
+import com.stripe.model.PlanCollection;
 import com.stripe.model.ProductCollection;
 
 import org.apache.http.conn.ssl.StrictHostnameVerifier;
@@ -100,6 +103,9 @@ public class PushServiceSocket {
   private static final String BILLING_PRODUCTS_PATH     = "/v1/billing/products/%s";
   private static final String BILLING_CHARGES_PATH      = "/v1/billing/charges/%s";
   private static final String BILLING_CHARGE_PATH       = "/v1/billing/charge/%s/%s";
+  private static final String BILLING_CUSTOMER_IDS_PATH = "/v1/billing/customer/ids";
+  private static final String BILLING_PLANS_PATH        = "/v1/billing/plans/%s";
+  private static final String BILLING_SUBSCRIBE_PATH    = "/v1/billing/subscribe/%s";
 
   private final String              serviceUrl;
   private final TrustManager[]      trustManagers;
@@ -168,6 +174,11 @@ public class PushServiceSocket {
     makeRequest(String.format(BILLING_CREDS_PATH, userId), "DELETE", null);
   }
 
+  public PlanCollection getPlans(String sellerNumber) throws IOException {
+    String responseText = makeRequest(String.format(BILLING_PLANS_PATH, sellerNumber), "GET", null);
+    return JsonUtil.fromJson(responseText, PlanCollection.class);
+  }
+
   public ProductCollection getProducts(String sellerNumber) throws IOException {
     String responseText = makeRequest(String.format(BILLING_PRODUCTS_PATH, sellerNumber), "GET", null);
     return JsonUtil.fromJson(responseText, ProductCollection.class);
@@ -179,11 +190,33 @@ public class PushServiceSocket {
 
   public String performCharge(String productId, String skuId, String sourceTokenId, String sellerNumber, String productName) throws IOException {
     Map<String, String> values = new HashMap<>();
-    values.put("sourceTokenId", sourceTokenId);
+
+    if (sourceTokenId != null) {
+      values.put("sourceTokenId", sourceTokenId);
+    }
+
     values.put("sellerNumber", sellerNumber);
     values.put("productName", productName);
 
     return makeRequest(String.format(BILLING_CHARGE_PATH, productId, skuId), "PUT", JsonUtil.toJson(values));
+  }
+
+  public String subscribeToPlan(String planId, String sourceTokenId, String sellerNumber, String planName) throws IOException {
+    Map<String, String> values = new HashMap<>();
+
+    if (sourceTokenId != null) {
+      values.put("sourceTokenId", sourceTokenId);
+    }
+
+    values.put("sellerNumber", sellerNumber);
+    values.put("planName", planName);
+
+    return makeRequest(String.format(BILLING_SUBSCRIBE_PATH, planId), "PUT", JsonUtil.toJson(values));
+  }
+
+  public Map<String, String> getCustomerIds() throws IOException {
+    String response = makeRequest(BILLING_CUSTOMER_IDS_PATH, "GET", null);
+    return new ObjectMapper().readValue(response, new TypeReference<Map<String, String>>(){});
   }
 
   public void sendProvisioningMessage(String destination, byte[] body) throws IOException {
