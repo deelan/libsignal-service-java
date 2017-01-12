@@ -561,6 +561,8 @@ public class PushServiceSocket {
     switch (responseCode) {
       case 413:
         throw new RateLimitException("Rate limit exceeded: " + responseCode);
+      case 402:
+        throw new NonSuccessfulResponseCodeException("Bad response: " + responseCode + " " + responseMessage + " " + responseBody);
       case 401:
       case 403:
         throw new AuthorizationFailedException("Authorization failed!");
