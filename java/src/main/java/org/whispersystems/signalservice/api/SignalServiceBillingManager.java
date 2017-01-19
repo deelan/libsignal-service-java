@@ -4,9 +4,9 @@ package org.whispersystems.signalservice.api;
 import com.stripe.model.PlanCollection;
 import com.stripe.model.ProductCollection;
 
-import org.whispersystems.signalservice.api.push.TrustStore;
 import org.whispersystems.signalservice.internal.push.BillingInfo;
 import org.whispersystems.signalservice.internal.push.PushServiceSocket;
+import org.whispersystems.signalservice.internal.push.SignalServiceUrl;
 import org.whispersystems.signalservice.internal.util.StaticCredentialsProvider;
 
 import java.io.IOException;
@@ -25,17 +25,16 @@ public class SignalServiceBillingManager {
     /**
      * Construct a SignalServiceBillingManager.
      *
-     * @param url The URL for the Signal Service.
-     * @param trustStore The {@link org.whispersystems.signalservice.api.push.TrustStore} for the SignalService server's TLS certificate.
+     * @param urls The URL for the Signal Service.
      * @param user A Signal Service phone number.
      * @param password A Signal Service password.
      * @param userAgent A string which identifies the client software.
      */
-    public SignalServiceBillingManager(String url, TrustStore trustStore,
+    public SignalServiceBillingManager(SignalServiceUrl[] urls,
                                        String user, String password,
                                        String userAgent)
     {
-        this.pushServiceSocket = new PushServiceSocket(url, trustStore, new StaticCredentialsProvider(user, password, null), userAgent);
+        this.pushServiceSocket = new PushServiceSocket(urls, new StaticCredentialsProvider(user, password, null), userAgent);
         this.user              = user;
         this.userAgent         = userAgent;
     }

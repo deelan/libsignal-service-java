@@ -19,9 +19,9 @@ import org.whispersystems.libsignal.util.guava.Optional;
 import org.whispersystems.signalservice.api.messages.multidevice.DeviceInfo;
 import org.whispersystems.signalservice.api.push.ContactTokenDetails;
 import org.whispersystems.signalservice.api.push.SignedPreKeyEntity;
-import org.whispersystems.signalservice.api.push.TrustStore;
 import org.whispersystems.signalservice.internal.crypto.ProvisioningCipher;
 import org.whispersystems.signalservice.internal.push.PushServiceSocket;
+import org.whispersystems.signalservice.internal.push.SignalServiceUrl;
 import org.whispersystems.signalservice.internal.util.Base64;
 import org.whispersystems.signalservice.internal.util.StaticCredentialsProvider;
 import org.whispersystems.signalservice.internal.util.Util;
@@ -52,17 +52,16 @@ public class SignalServiceAccountManager {
   /**
    * Construct a SignalServiceAccountManager.
    *
-   * @param url The URL for the Signal Service.
-   * @param trustStore The {@link org.whispersystems.signalservice.api.push.TrustStore} for the SignalService server's TLS certificate.
+   * @param urls The URL for the Signal Service.
    * @param user A Signal Service phone number.
    * @param password A Signal Service password.
    * @param userAgent A string which identifies the client software.
    */
-  public SignalServiceAccountManager(String url, TrustStore trustStore,
+  public SignalServiceAccountManager(SignalServiceUrl[] urls,
                                      String user, String password,
                                      String userAgent)
   {
-    this.pushServiceSocket = new PushServiceSocket(url, trustStore, new StaticCredentialsProvider(user, password, null), userAgent);
+    this.pushServiceSocket = new PushServiceSocket(urls, new StaticCredentialsProvider(user, password, null), userAgent);
     this.user              = user;
     this.userAgent         = userAgent;
   }
@@ -110,9 +109,9 @@ public class SignalServiceAccountManager {
    * @param signalingKey 52 random bytes.  A 32 byte AES key and a 20 byte Hmac256 key,
    *                     concatenated.
    * @param signalProtocolRegistrationId A random 14-bit number that identifies this Signal install.
-   *                              This value should remain consistent across registrations for the
-   *                              same install, but probabilistically differ across registrations
-   *                              for separate installs.
+   *                                     This value should remain consistent across registrations for the
+   *                                     same install, but probabilistically differ across registrations
+   *                                     for separate installs.
    * @param voice A boolean that indicates whether the client supports secure voice (RedPhone) calls.
    *
    * @throws IOException
@@ -131,18 +130,18 @@ public class SignalServiceAccountManager {
 
    * @param signalingKey 52 random bytes.  A 32 byte AES key and a 20 byte Hmac256 key,
    *                     concatenated.
-   * @param axolotlRegistrationId A random 14-bit number that identifies this Signal install.
-   *                              This value should remain consistent across registrations for the
-   *                              same install, but probabilistically differ across registrations
-   *                              for separate installs.
+   * @param signalProtocolRegistrationId A random 14-bit number that identifies this Signal install.
+   *                                     This value should remain consistent across registrations for the
+   *                                     same install, but probabilistically differ across registrations
+   *                                     for separate installs.
    * @param voice A boolean that indicates whether the client supports secure voice (RedPhone) calls.
    *
    * @throws IOException
    */
-  public void verifyAccountWithToken(String verificationToken, String signalingKey, int axolotlRegistrationId, boolean voice)
+  public void verifyAccountWithToken(String verificationToken, String signalingKey, int signalProtocolRegistrationId, boolean voice)
       throws IOException
   {
-    this.pushServiceSocket.verifyAccountToken(verificationToken, signalingKey, axolotlRegistrationId, voice);
+    this.pushServiceSocket.verifyAccountToken(verificationToken, signalingKey, signalProtocolRegistrationId, voice);
   }
 
   /**
@@ -150,9 +149,9 @@ public class SignalServiceAccountManager {
    *
    * @param signalingKey 52 random bytes.  A 32 byte AES key and a 20 byte Hmac256 key, concatenated.
    * @param signalProtocolRegistrationId A random 14-bit number that identifies this Signal install.
-   *                              This value should remain consistent across registrations for the same
-   *                              install, but probabilistically differ across registrations for
-   *                              separate installs.
+   *                                     This value should remain consistent across registrations for the same
+   *                                     install, but probabilistically differ across registrations for
+   *                                     separate installs.
    * @param voice A boolean that indicates whether the client supports secure voice (RedPhone)
    *
    * @throws IOException
